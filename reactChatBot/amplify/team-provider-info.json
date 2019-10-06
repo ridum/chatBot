@@ -1,0 +1,19 @@
+{
+    "test": {
+        "awscloudformation": {
+            "AuthRoleName": "reactchatbot-test-20191006003022-authRole",
+            "UnauthRoleArn": "arn:aws:iam::641862751434:role/reactchatbot-test-20191006003022-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::641862751434:role/reactchatbot-test-20191006003022-authRole",
+            "Region": "us-west-2",
+            "DeploymentBucketName": "reactchatbot-test-20191006003022-deployment",
+            "UnauthRoleName": "reactchatbot-test-20191006003022-unauthRole",
+            "StackName": "reactchatbot-test-20191006003022",
+            "StackId": "arn:aws:cloudformation:us-west-2:641862751434:stack/reactchatbot-test-20191006003022/286bf9c0-e80b-11e9-9958-0a06032da4ca"
+        },
+        "categories": {
+            "auth": {
+                "cognitof79de038": {}
+            }
+        }
+    }
+}

@@ -1,4 +1,4 @@
-package com.chatbotreact;
+package com.reactchatbot;
 
 import android.app.Application;
 import android.content.Context;
