@@ -7,7 +7,7 @@
  */
 
 import React, { Component } from 'react';
-import { StyleSheet, Text, SafeAreaView, Alert, StatusBar } from 'react-native';
+import { StyleSheet, SafeAreaView, Alert, StatusBar } from 'react-native';
 import Amplify from 'aws-amplify';
 import { ChatBot } from 'aws-amplify-react-native';
 
@@ -29,7 +29,7 @@ export default class App extends Component {
 
     state = {
         botName: 'ScheduleAppointment_test',
-        welcomeMessage: 'Welcome, what would you like to do today?',
+        welcomeMessage: 'Hello, it is lunch time, what do you want to eat today?',
     };
 
     constructor(props) {
@@ -53,7 +53,7 @@ export default class App extends Component {
     }
 
     render() {
-        const { botName, showChatBot, welcomeMessage } = this.state;
+        const { botName, welcomeMessage } = this.state;
 
         return (
         <SafeAreaView style={styles.container}>
