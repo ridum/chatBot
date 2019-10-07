@@ -2,14 +2,14 @@
  * Sample React Native chat UI Based from :
  * https://medium.com/@itsHabib/integrate-an-amazon-lex-chatbot-into-a-react-native-app-1536883ccbed
  *
- * @format
- * @flow
+ 
  */
 
 import React, { Component } from 'react';
 import {
     Text, 
     View, 
+    Button,
     StyleSheet,
     TextInput,
     FlatList,
@@ -22,7 +22,8 @@ AWS.config.credentials = new AWS.CognitoIdentityCredentials({
 })
 
 let lexRunTime = new AWS.LexRuntime();
-let lexUserId = 'mediumBot' + Date.now()
+let lexUserId = 'mediumBot' + Date.now();
+let START_MSG = 'Hello, it is lunch time, what do you want to eat today?';
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -41,8 +42,18 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 20,
         alignSelf: 'flex-start',
         bottom: 23,
-        textAlign: 'left',
         width: '75%'
+    },
+    buttonContainer: {
+        color: 'black',
+        borderBottomLeftRadius: 0,
+        borderBottomRightRadius: 20,
+        borderTopLeftRadius: 20,
+        marginBottom: 0,
+        borderTopRightRadius: 20,
+        alignSelf: 'flex-end',
+        bottom: 23,
+
     },
     userMessages: {
         backgroundColor: '#40AD4D',
@@ -78,7 +89,7 @@ export default class App extends Component {
         super(props)    
         this.state = {
             userInput: '',
-            messages: [],
+            messages: [{from: 'bot', msg: START_MSG}],
             inputEnabled: true,
         }
     }
@@ -121,9 +132,16 @@ export default class App extends Component {
         })
     }
     showResponse(lexResponse) {
-        let lexMessage = lexResponse.message
+        let lexMessage = lexResponse.message;
         let oldMessages = Object.assign([], this.state.messages)
         oldMessages.push({from: 'bot', msg: lexMessage})
+        
+        if(lexResponse.responseCard && lexResponse.responseCard.genericAttachments){
+            for (let card of lexResponse.responseCard.genericAttachments){
+                oldMessages.push({from: 'bot_selection', msg: JSON.stringify(card.title)});                
+            }
+        }
+        
         this.setState({
             messages: oldMessages,
             inputEnabled: true 
@@ -134,10 +152,25 @@ export default class App extends Component {
         if (item.from === 'bot') {
             style = styles.botMessages
             responseStyle = styles.responseContainer
+        } else if (item.from === 'bot_selection'){
+            style = styles.botMessages
+            responseStyle = styles.responseContainer
+            return (
+                <View style={responseStyle}>
+                    <Text style={style}>{item.msg}</Text>
+                    <View style={styles.buttonContainer}>
+                        <Button         
+                            title = 'This One!'
+                            onPress={() => this.sendToLex(item.msg)}
+                        />
+                    </View>
+                </View>
+            )
         } else {
             style = styles.userMessages
             responseStyle = {}
         }
+
         return (
             <View style={responseStyle}>
                 <Text style={style}>{item.msg}</Text>
@@ -151,7 +184,7 @@ export default class App extends Component {
                     <FlatList 
                         data={this.state.messages}
                         renderItem={({ item }) =>    this.renderTextItem(item)}
-                        keyExtractor={(item, index) => index}
+                        keyExtractor={(item, index) => String(index)}
                         extraData={this.state.messages}
                     />
                 </View>
@@ -161,7 +194,7 @@ export default class App extends Component {
                         value={this.state.userInput}
                         style={styles.textInput}
                         editable={this.state.inputEnabled}
-                        placeholder={'Type here to talk!'}
+                        placeholder={'Click here for input!'}
                         autoFocus={true}
                         onSubmitEditing={this.handleTextSubmit.bind(this)}
                     />
