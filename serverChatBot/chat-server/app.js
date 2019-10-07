@@ -1,10 +1,33 @@
-
+const AWS = require("aws-sdk");
+const dynamodb = new AWS.DynamoDB();
+const docClient = new AWS.DynamoDB.DocumentClient();
 
 exports.getRestaurant = async (event, context) => {
-    let lambda_response;
+    
+    const failedResponse = {     
+        "sessionAttributes": {
+            "food":  event.currentIntent.slots.Food
+        },   
+        "dialogAction": {
+            "type": "Close",    
+            "fulfillmentState": "Failed",    
+            "message": {      
+                "contentType": "PlainText",      
+                "content": "Sorry I do not have this type of food in my Database yet. Wanna try something else?"    
+            },
+        }
+    };
+    
     
     try {
-        lambda_response = {     
+        let queryResult = await getRestaurantByType(event.currentIntent.slots.Food.toLowerCase());
+        
+        if (queryResult.Count === 0){
+            throw new Error("Not exist in Database");   
+        }
+        
+        let cards = await constructCards(queryResult);
+        let SuccessResponse = {     
             "sessionAttributes": {
                 "food":  event.currentIntent.slots.Food
             },   
@@ -17,34 +40,47 @@ exports.getRestaurant = async (event, context) => {
                 "responseCard": {
                   "version": 1,
                   "contentType": "application/vnd.amazonaws.card.generic",
-                  "genericAttachments": [
-                      {
-                         "title":"restaurant name",
-                         "buttons":[ 
-                             {
-                                "text":"this is the text",
-                                "value":"Talay Thai Restaurant"
-                             }
-                          ]
-                       },
-                        {
-                         "title":"restaurant name2",
-                         "buttons":[ 
-                             {
-                                "text":"this is the text2",
-                                "value":"Thai Basil Restaurant"
-                             }
-                          ]
-                       }, 
-                   ] 
+                  "genericAttachments": cards
                 } 
             }
         }
+        return SuccessResponse;
     } catch (err) {
-        console.log(err);
-        return err;
+        return failedResponse;
     }
 
-    return lambda_response;
+
 };
+
+async function getRestaurantByType(type){
+    var params = {
+        TableName: 'restaurant_test',
+        ProjectionExpression: "restaurant_name",
+        FilterExpression: `#restType = :t`,
+        ExpressionAttributeNames: {
+            "#restType": "type",
+        },
+        ExpressionAttributeValues: {
+            ":t": type,
+        }
+    };
+    return docClient.scan(params).promise();
+}
+
+async function constructCards(event){
+    let sol = [];
+    for( let item of event.Items ) {
+        sol.push({
+            title: item.restaurant_name,
+            buttons:[ 
+                {
+                    text :"This one!",
+                    value: item.restaurant_name
+                }
+            ]
+        })            
+    }
+    return sol
+}
+
 
