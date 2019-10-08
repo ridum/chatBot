@@ -105,7 +105,7 @@ export default class App extends Component {
     showRequest(inputText) {
         // Add text input to messages in state
         let oldMessages = Object.assign([], this.state.messages)
-        oldMessages.push({from: 'user', msg: inputText})
+        oldMessages.unshift({from: 'user', msg: inputText})
         this.setState({
             messages: oldMessages,
             userInput: '',
@@ -134,11 +134,11 @@ export default class App extends Component {
     showResponse(lexResponse) {
         let lexMessage = lexResponse.message;
         let oldMessages = Object.assign([], this.state.messages)
-        oldMessages.push({from: 'bot', msg: lexMessage})
+        oldMessages.unshift({from: 'bot', msg: lexMessage})
         
         if(lexResponse.responseCard && lexResponse.responseCard.genericAttachments){
             for (let card of lexResponse.responseCard.genericAttachments){
-                oldMessages.push({from: 'bot_selection', msg: JSON.stringify(card.title)});                
+                oldMessages.unshift({from: 'bot_selection', msg: JSON.stringify(card.title)});                
             }
         }
         
@@ -185,6 +185,7 @@ export default class App extends Component {
                         data={this.state.messages}
                         renderItem={({ item }) =>    this.renderTextItem(item)}
                         keyExtractor={(item, index) => String(index)}
+                        inverted = {true}
                         extraData={this.state.messages}
                     />
                 </View>
